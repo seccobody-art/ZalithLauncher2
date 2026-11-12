@@ -59,7 +59,11 @@ data class Account(
     var otherAccount: String? = null,
     var otherPassword: String? = null,
     var accountType: String? = null,
-    var skinModelType: SkinModelType = SkinModelType.NONE
+    var skinModelType: SkinModelType = SkinModelType.NONE,
+    /**
+     * Name color shown inside the launcher only (ARGB int). null = default theme color
+     */
+    var nameColor: Int? = null
 ): Parcelable {
     val hasSkinFile: Boolean
         get() = getSkinFile().exists()

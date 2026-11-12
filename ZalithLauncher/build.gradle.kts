@@ -16,6 +16,9 @@ plugins {
 }
 
 val zalithPackageName = "com.movtery.zalithlauncher"
+//The id Android uses to tell apps apart. It is separate from the code package (namespace) above,
+//so Secco can be installed next to Zalith. Override with -Papplication_id=... when needed.
+val seccoApplicationId = project.findProperty("application_id") as? String ?: "com.secco.launcher"
 val launcherAPPName = project.findProperty("launcher_app_name") as? String ?: error("The \"launcher_app_name\" property is not set in gradle.properties.")
 val launcherName = project.findProperty("launcher_name") as? String ?: error("The \"launcher_name\" property is not set in gradle.properties.")
 val launcherShortName = project.findProperty("launcher_short_name") as? String ?: error("The \"launcher_short_name\" property is not set in gradle.properties.")
@@ -129,8 +132,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = zalithPackageName
-        applicationIdSuffix = ".v2"
+        applicationId = seccoApplicationId
         minSdk = 26
         targetSdk = 34
         versionCode = launcherVersionCode

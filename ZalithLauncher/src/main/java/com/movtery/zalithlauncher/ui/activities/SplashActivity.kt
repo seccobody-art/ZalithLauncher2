@@ -25,8 +25,14 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
@@ -45,6 +51,7 @@ import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.setting.launcherMMKV
 import com.movtery.zalithlauncher.ui.base.BaseAppCompatActivity
 import com.movtery.zalithlauncher.ui.screens.navigateOnce
+import com.movtery.zalithlauncher.ui.screens.splash.SeccoIntro
 import com.movtery.zalithlauncher.ui.screens.splash.SplashOperation
 import com.movtery.zalithlauncher.ui.screens.splash.SplashScreen
 import com.movtery.zalithlauncher.ui.theme.ZalithLauncherTheme
@@ -59,6 +66,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -88,6 +96,10 @@ class SplashActivity : BaseAppCompatActivity() {
     private var unpackJob: Job? = null
 
     private var pendingImportIntent: Intent? = null
+
+    /** Set once the intro animation is over; the launcher must not jump to the main screen before that */
+    private val introFinished = MutableStateFlow(false)
+    private var swappingToMain = false
 
     private val backStackViewModel: SplashBackStackViewModel by viewModels()
     private val _availableAgreement = MutableStateFlow<AvailableAgreement?>(null)
@@ -140,18 +152,28 @@ class SplashActivity : BaseAppCompatActivity() {
                     color = backgroundColor(),
                     contentColor = onBackgroundColor()
                 ) {
-                    SplashScreen(
-                        startAllTask = { startAllTask() },
-                        onWelcomeFinished = {
-                            launcherMMKV().putInt(WELCOME_VERSION_KEY, WELCOME_VERSION_VALUE).apply()
-                            acceptCurrentAgreement()
-                            switchScreen(SplashOperation.Loading)
-                            checkTasksToMain()
-                        },
-                        availableAgreement = availableAgreement,
-                        unpackItems = unpackItems,
-                        screenViewModel = backStackViewModel
-                    )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        SplashScreen(
+                            startAllTask = { startAllTask() },
+                            onWelcomeFinished = {
+                                launcherMMKV().putInt(WELCOME_VERSION_KEY, WELCOME_VERSION_VALUE).apply()
+                                acceptCurrentAgreement()
+                                switchScreen(SplashOperation.Loading)
+                                checkTasksToMain()
+                            },
+                            availableAgreement = availableAgreement,
+                            unpackItems = unpackItems,
+                            screenViewModel = backStackViewModel
+                        )
+
+                        var introDone by rememberSaveable { mutableStateOf(false) }
+                        LaunchedEffect(introDone) {
+                            if (introDone) introFinished.value = true
+                        }
+                        if (!introDone) {
+                            SeccoIntro(onFinished = { introDone = true })
+                        }
+                    }
                 }
             }
         }
@@ -353,11 +375,17 @@ class SplashActivity : BaseAppCompatActivity() {
     }
 
     private fun swapToMain() {
-        val forward = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        if (swappingToMain) return
+        swappingToMain = true
+        lifecycleScope.launch {
+            //let the intro animation play to the end first
+            introFinished.first { it }
+            val forward = Intent(this@SplashActivity, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+            startActivity(forward)
+            finish()
         }
-        startActivity(forward)
-        finish()
     }
 
 

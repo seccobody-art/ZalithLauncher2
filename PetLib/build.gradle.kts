@@ -52,12 +52,26 @@ dependencies {
  * 需要本机安装 rustup、cargo-ndk（cargo install cargo-ndk），
  * 以及四个 Android target（rustup target add <triple>）。
  */
-val rustAbis = mapOf(
+val allRustAbis = mapOf(
     "arm64-v8a" to "aarch64-linux-android",
     "armeabi-v7a" to "armv7-linux-androideabi",
     "x86" to "i686-linux-android",
     "x86_64" to "x86_64-linux-android",
 )
+// Same -Darch switch the app module uses: build only the ABI that gets packaged.
+// "all" (the default) still builds every ABI.
+val rustArchToAbi = mapOf(
+    "arm" to "armeabi-v7a",
+    "arm64" to "arm64-v8a",
+    "x86" to "x86",
+    "x86_64" to "x86_64",
+)
+val rustArch: String = System.getProperty("arch", "all")
+val rustAbis = if (rustArch == "all") {
+    allRustAbis
+} else {
+    allRustAbis.filterKeys { it == rustArchToAbi[rustArch] }
+}
 val petlibJniLibs = layout.buildDirectory.dir("petlib-jniLibs")
 
 val cargoBuild = tasks.register("cargoBuild") {
@@ -66,6 +80,8 @@ val cargoBuild = tasks.register("cargoBuild") {
     inputs.dir("rust/src")
     inputs.file("rust/Cargo.toml")
     inputs.file("rust/Cargo.lock")
+    //Switching the architecture must re-run the build, otherwise Gradle would reuse the old ABIs
+    inputs.property("rustArch", rustArch)
     outputs.dir(petlibJniLibs)
     doLast {
         fun tool(command: String, args: List<String>): String? = try {
@@ -88,6 +104,9 @@ val cargoBuild = tasks.register("cargoBuild") {
             throw GradleException(
                 "cargo-ndk is required to build PetLib. Install it with: cargo install cargo-ndk"
             )
+        }
+        if (rustAbis.isEmpty()) {
+            throw GradleException("Unknown architecture \"$rustArch\" for PetLib. Use all, arm, arm64, x86 or x86_64.")
         }
         val installedTargets = tool("rustup", listOf("target", "list", "--installed")) ?: ""
         val missing = rustAbis.values.filter { triple -> !installedTargets.contains(triple) }

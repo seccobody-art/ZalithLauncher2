@@ -78,6 +78,7 @@ import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.setting.enums.AppLanguage
 import com.movtery.zalithlauncher.setting.enums.BackgroundBlur
+import com.movtery.zalithlauncher.setting.enums.CornerStyle
 import com.movtery.zalithlauncher.setting.enums.DarkMode
 import com.movtery.zalithlauncher.setting.enums.MirrorSourceType
 import com.movtery.zalithlauncher.setting.enums.applyLanguage
@@ -197,6 +198,16 @@ fun LauncherSettingsScreen(
                         unit = AllSettings.launcherDarkMode,
                         items = DarkMode.entries,
                         title = stringResource(R.string.settings_launcher_dark_mode_title),
+                        getItemText = { stringResource(it.textRes) }
+                    )
+
+                    ListSettingsCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle,
+                        unit = AllSettings.launcherCornerStyle,
+                        items = CornerStyle.entries,
+                        title = stringResource(R.string.settings_launcher_corner_style_title),
+                        summary = stringResource(R.string.settings_launcher_corner_style_summary),
                         getItemText = { stringResource(it.textRes) }
                     )
 

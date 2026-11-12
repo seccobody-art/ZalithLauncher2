@@ -140,6 +140,10 @@ sealed interface NormalNavKey : TitledNavKey {
         @Serializable data object ShadersManager : Versions {
             @Contextual override var title: AndroidStringText = androidText(R.string.shader_pack_manage)
         }
+        /** Datapack manager screen */
+        @Serializable data object DatapacksManager : Versions {
+            @Contextual override var title: AndroidStringText = androidText(R.string.datapack_manage)
+        }
         /** 截屏管理屏幕 */
         @Serializable data object ScreenshotsManager : Versions {
             @Contextual override var title: AndroidStringText = androidText(R.string.screenshots_manage)

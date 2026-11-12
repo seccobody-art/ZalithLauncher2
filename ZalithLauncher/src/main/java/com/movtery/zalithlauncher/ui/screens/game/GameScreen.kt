@@ -82,7 +82,9 @@ import com.movtery.zalithlauncher.game.sdl.SdlBridge
 import com.movtery.zalithlauncher.game.sdl.SdlTextSender
 import com.movtery.zalithlauncher.game.support.touch_controller.touchControllerInputModifier
 import com.movtery.zalithlauncher.game.support.touch_controller.touchControllerTouchModifier
+import com.movtery.zalithlauncher.filemanager.FileManagerLauncher
 import com.movtery.zalithlauncher.game.version.installed.Version
+import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.setting.enums.isLauncherInDarkTheme
 import com.movtery.zalithlauncher.setting.enums.toAction
@@ -762,6 +764,15 @@ fun GameScreen(
             closeScreen = { viewModel.gameMenuState = MenuState.HIDE },
             onForceClose = { viewModel.forceCloseState = ForceCloseOperation.Show },
             onSwitchLog = { onLogStateChange(logState.next()) },
+            onOpenFiles = {
+                //The file manager runs in its own process and task, so the game keeps running behind it
+                FileManagerLauncher.launch(
+                    context = context,
+                    rootPath = version.getGameHome(),
+                    currentPath = version.getGameDir().absolutePath,
+                    logsDir = PathManager.DIR_LAUNCHER_LOGS.absolutePath
+                )
+            },
             enableTerracotta = AllSettings.enableTerracotta.state,
             onOpenTerracottaMenu = { terracottaViewModel.openMenu() },
             onRefreshWindowSize = { eventViewModel.sendEvent(EventViewModel.Event.Game.RefreshSize) },

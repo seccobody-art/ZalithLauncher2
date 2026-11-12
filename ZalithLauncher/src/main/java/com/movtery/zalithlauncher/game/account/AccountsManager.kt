@@ -259,6 +259,22 @@ object AccountsManager {
     }
 
     /**
+     * Update an account's launcher-only name color without changing the selected account.
+     * @param color ARGB int, or null to reset to the default color
+     */
+    fun updateNameColor(account: Account, color: Int?) {
+        scope.launch {
+            runCatching {
+                val latest = accountDao.getAccount(account.uniqueUUID) ?: account
+                accountDao.saveAccount(latest.copy(nameColor = color))
+            }.onFailure { e ->
+                Logger.error(TAG, "Failed to update name color: ${account.username}", e)
+            }
+            suspendReloadAccounts()
+        }
+    }
+
+    /**
      * 从数据库中删除账号，并刷新
      */
     fun deleteAccount(account: Account) {

@@ -1,9 +1,8 @@
 name: Build CI
 
+# Secco: this used to build every architecture on every push. That is slow and burns build
+# minutes, so it only runs when started by hand. Day to day use "Secco build" instead.
 on:
-  push:
-    branches:
-      - '**'
   workflow_dispatch:
 
 jobs:

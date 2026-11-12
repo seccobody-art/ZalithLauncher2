@@ -726,6 +726,9 @@ private fun AccountsLayout(
                         onCopyUUID = {
                             copyText(COPY_LABEL_ACCOUNT_UUID, account.profileId, context, true)
                         },
+                        onNameColorChange = { color ->
+                            AccountsManager.updateNameColor(account, color)
+                        },
                         onDeleteClick = {
                             actions.onIntent(
                                 AccountManageIntent.UpdateAccountOp(

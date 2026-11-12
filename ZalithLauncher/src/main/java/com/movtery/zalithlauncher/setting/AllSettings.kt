@@ -31,6 +31,7 @@ import com.movtery.zalithlauncher.game.version.installed.GraphicsApi
 import com.movtery.zalithlauncher.setting.enums.ActionMenuSide
 import com.movtery.zalithlauncher.setting.enums.AppLanguage
 import com.movtery.zalithlauncher.setting.enums.BackgroundBlur
+import com.movtery.zalithlauncher.setting.enums.CornerStyle
 import com.movtery.zalithlauncher.setting.enums.DarkMode
 import com.movtery.zalithlauncher.setting.enums.FpsDisplayMode
 import com.movtery.zalithlauncher.setting.enums.GamepadInputMode
@@ -383,14 +384,14 @@ object AllSettings : SettingsRegistry() {
      */
     val launcherColorTheme = enumSetting(
         "launcherColorTheme",
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) ColorThemeType.DYNAMIC
-        else ColorThemeType.EMBERMIRE
+        //Secco default: the brand purple below, instead of the wallpaper based dynamic colors
+        ColorThemeType.CUSTOM
     )
 
     /**
      * 自定义颜色主题色
      */
-    val launcherCustomColor = intSetting("launcherCustomColor", Color.Blue.toArgb())
+    val launcherCustomColor = intSetting("launcherCustomColor", Color(0xFF8A5CFF).toArgb())
 
     /**
      * 自定义颜色配色风格
@@ -400,7 +401,17 @@ object AllSettings : SettingsRegistry() {
     /**
      * 启动器UI深色主题
      */
-    val launcherDarkMode = enumSetting("launcherDarkMode", DarkMode.FollowSystem)
+    val launcherDarkMode = enumSetting("launcherDarkMode", DarkMode.Enable)
+
+    /**
+     * Corner roundness of cards, buttons and dialogs
+     */
+    val launcherCornerStyle = enumSetting("launcherCornerStyle", CornerStyle.ROUND)
+
+    /**
+     * Streamer mode: hides account names on the home screen
+     */
+    val launcherStreamerMode = boolSetting("launcherStreamerMode", false)
 
     /**
      * 启动器语言
@@ -415,7 +426,7 @@ object AllSettings : SettingsRegistry() {
     /**
      * 持续型节日彩蛋效果
      */
-    val launcherFestivalEffects = boolSetting("launcherFestivalEffects", true)
+    val launcherFestivalEffects = boolSetting("launcherFestivalEffects", false)
 
     /**
      * 启用页面切换动画

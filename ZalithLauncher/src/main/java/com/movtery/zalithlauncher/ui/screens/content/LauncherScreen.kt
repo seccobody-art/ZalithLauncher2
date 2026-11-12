@@ -54,6 +54,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInParent
@@ -90,6 +91,7 @@ import com.movtery.zalithlauncher.setting.enums.ActionMenuSide
 import com.movtery.zalithlauncher.ui.base.BaseScreen
 import com.movtery.zalithlauncher.ui.components.AnimatedDirection
 import com.movtery.zalithlauncher.ui.components.BackgroundCard
+import com.movtery.zalithlauncher.ui.components.PerformanceModeDialog
 import com.movtery.zalithlauncher.ui.components.MarqueeText
 import com.movtery.zalithlauncher.ui.components.PetModelView
 import com.movtery.zalithlauncher.ui.components.ScalingActionButton
@@ -320,6 +322,7 @@ private fun AccountAvatarCenter(
             ) {
                 Text(
                     text = account?.username ?: stringResource(R.string.account_add_new_account),
+                    color = account?.nameColor?.let { Color(it) } ?: Color.Unspecified,
                     maxLines = 1,
                     style = MaterialTheme.typography.titleSmall
                 )
@@ -366,6 +369,7 @@ private fun AccountAvatarRow(
         ) {
             Text(
                 text = account?.username ?: stringResource(R.string.account_add_new_account),
+                color = account?.nameColor?.let { Color(it) } ?: Color.Unspecified,
                 maxLines = 1,
                 style = MaterialTheme.typography.titleSmall
             )
@@ -390,6 +394,7 @@ private fun VersionsContent(
     val isRefreshing by VersionsManager.isRefreshing.collectAsStateWithLifecycle()
 
     var showList by remember { mutableStateOf(false) }
+    var showPerformance by remember { mutableStateOf(false) }
     var versionManagerRow by remember { mutableStateOf<LayoutCoordinates?>(null) }
     Column(modifier = modifier) {
         Box(
@@ -414,6 +419,14 @@ private fun VersionsContent(
                             .fillMaxWidth(),
                         swapToVersionManage = toVersionManageScreen,
                         openListMenu = { showList = true },
+                    )
+                }
+                IconButton(
+                    onClick = { showPerformance = true }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_rocket_launch_filled),
+                        contentDescription = stringResource(R.string.performance_mode_title)
                     )
                 }
                 version?.takeIf { !isRefreshing && it.isValid() }?.let {
@@ -479,6 +492,13 @@ private fun VersionsContent(
                     )
                 }
             }
+        }
+
+        if (showPerformance) {
+            PerformanceModeDialog(
+                version = version,
+                onDismiss = { showPerformance = false }
+            )
         }
 
         ScalingActionButton(

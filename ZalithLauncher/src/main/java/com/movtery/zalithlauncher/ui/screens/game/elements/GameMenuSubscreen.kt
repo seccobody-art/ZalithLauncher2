@@ -111,6 +111,7 @@ fun GameMenuSubscreen(
     closeScreen: () -> Unit,
     onForceClose: () -> Unit,
     onSwitchLog: () -> Unit,
+    onOpenFiles: () -> Unit,
     enableTerracotta: Boolean,
     onOpenTerracottaMenu: () -> Unit,
     onRefreshWindowSize: () -> Unit,
@@ -196,6 +197,7 @@ fun GameMenuSubscreen(
                 modifier = Modifier.weight(1f),
                 onForceClose = onForceClose,
                 onSwitchLog = onSwitchLog,
+                onOpenFiles = onOpenFiles,
                 enableTerracotta = enableTerracotta,
                 onOpenTerracottaMenu = onOpenTerracottaMenu,
                 onRefreshWindowSize = onRefreshWindowSize,
@@ -209,6 +211,7 @@ fun GameMenuSubscreen(
 private fun GameActionContent(
     onForceClose: () -> Unit,
     onSwitchLog: () -> Unit,
+    onOpenFiles: () -> Unit,
     enableTerracotta: Boolean,
     onOpenTerracottaMenu: () -> Unit,
     onRefreshWindowSize: () -> Unit,
@@ -241,6 +244,16 @@ private fun GameActionContent(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.game_menu_option_switch_log),
                 onClick = onSwitchLog,
+                color = color,
+                contentColor = contentColor,
+            )
+        }
+        //Open the file manager on the current version's game folder
+        item {
+            MenuTextButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.game_menu_option_files),
+                onClick = onOpenFiles,
                 color = color,
                 contentColor = contentColor,
             )

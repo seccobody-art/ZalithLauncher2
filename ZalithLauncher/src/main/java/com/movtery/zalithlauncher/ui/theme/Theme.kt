@@ -680,6 +680,7 @@ fun ZalithLauncherTheme(
         MaterialExpressiveTheme(
             colorScheme = currentDisplayScheme,
             motionScheme = MotionScheme.expressive(),
+            shapes = seccoShapes(AllSettings.launcherCornerStyle.state),
             typography = AppTypography,
             content = content
         )

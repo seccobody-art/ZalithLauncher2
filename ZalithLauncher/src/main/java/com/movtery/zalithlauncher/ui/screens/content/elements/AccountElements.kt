@@ -89,6 +89,7 @@ import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -114,6 +115,7 @@ import com.movtery.petlib.ArmModel
 import com.movtery.petlib.PetAnimation
 import com.movtery.zalithlauncher.BuildKeys
 import com.movtery.zalithlauncher.R
+import com.movtery.colorpicker.rememberColorPickerController
 import com.movtery.zalithlauncher.game.account.Account
 import com.movtery.zalithlauncher.game.account.AccountType
 import com.movtery.zalithlauncher.game.account.AccountsManager
@@ -137,6 +139,7 @@ import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.path.URL_MINECRAFT_PURCHASE
 import com.movtery.zalithlauncher.ui.AndroidStringText
 import com.movtery.zalithlauncher.ui.androidText
+import com.movtery.zalithlauncher.ui.components.ColorPickerDialog
 import com.movtery.zalithlauncher.ui.components.BaseIconTextButton
 import com.movtery.zalithlauncher.ui.components.ButtonPosition
 import com.movtery.zalithlauncher.ui.components.IconTextButton
@@ -312,6 +315,7 @@ fun AccountItem(
     openChangeSkinDialog: () -> Unit = {},
     onRefreshClick: () -> Unit = {},
     onCopyUUID: () -> Unit = {},
+    onNameColorChange: (Int?) -> Unit = {},
     onDeleteClick: () -> Unit = {}
 ) {
     val selected = currentAccount?.uniqueUUID == account.uniqueUUID
@@ -356,7 +360,10 @@ fun AccountItem(
                     .align(Alignment.CenterVertically)
                     .weight(1f)
             ) {
-                Text(text = account.username)
+                Text(
+                    text = account.username,
+                    color = account.nameColor?.let { Color(it) } ?: Color.Unspecified
+                )
                 Text(
                     text = getAccountTypeName(account),
                     style = MaterialTheme.typography.labelMedium
@@ -377,6 +384,7 @@ fun AccountItem(
 
                 //更多操作
                 var menuExpanded by remember { mutableStateOf(false) }
+                var showNameColorDialog by remember { mutableStateOf(false) }
                 Box {
                     IconButton(onClick = { menuExpanded = true }) {
                         Icon(
@@ -405,6 +413,34 @@ fun AccountItem(
                             }
                         )
                         DropdownMenuItem(
+                            text = { Text(stringResource(R.string.account_name_color)) },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_format_paint_outlined),
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = {
+                                menuExpanded = false
+                                showNameColorDialog = true
+                            }
+                        )
+                        if (account.nameColor != null) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.account_name_color_reset)) },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_refresh),
+                                        contentDescription = null
+                                    )
+                                },
+                                onClick = {
+                                    menuExpanded = false
+                                    onNameColorChange(null)
+                                }
+                            )
+                        }
+                        DropdownMenuItem(
                             text = { Text(stringResource(R.string.account_local_uuid_copy)) },
                             leadingIcon = {
                                 Icon(
@@ -431,6 +467,20 @@ fun AccountItem(
                             }
                         )
                     }
+                }
+
+                if (showNameColorDialog) {
+                    val initialColor = account.nameColor?.let { Color(it) } ?: Color.White
+                    val colorController = rememberColorPickerController(initialColor = initialColor)
+                    ColorPickerDialog(
+                        colorController = colorController,
+                        onCancel = { showNameColorDialog = false },
+                        onConfirm = { picked ->
+                            showNameColorDialog = false
+                            onNameColorChange(picked.copy(alpha = 1f).toArgb())
+                        },
+                        showAlpha = false
+                    )
                 }
             }
         }
